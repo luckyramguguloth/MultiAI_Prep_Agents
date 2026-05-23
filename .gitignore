@@ -1,0 +1,71 @@
+# --- OS Metadata ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Python Environment & Cache ---
+venv/
+.venv/
+env/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.tox/
+.coverage
+.cache
+htmlcov/
+nosetests.xml
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Node / Frontend Build ---
+node_modules/
+.next/
+out/
+build/
+dist/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Environment & Credentials (SENSITIVE) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+secret.key
+
+# --- Generated Reports & Logs ---
+backend/logs/
+*.log
+security_report.json
+~$*.doc*
+**/.env*
+
+# --- Python Build Outputs ---
+build/
+dist/
+*.egg-info/
+
+# --- IDE Configs ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+#images
+.svg
+.png
+#document files
+generate_comprehensive_report.py
+generate_report.py

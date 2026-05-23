@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+websockets
+redis
+celery
+crewai
+langchain
+langchain-openai
+python-dotenv
+slowapi
+loguru
+cryptography
