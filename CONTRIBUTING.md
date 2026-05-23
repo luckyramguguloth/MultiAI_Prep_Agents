@@ -1,6 +1,6 @@
-# Contributing to Autonomous 3D Job Application Pipeline
+# Contributing to Autonomous job prep pipeline
 
-First off, thank you for considering contributing to the Autonomous 3D Job Application Pipeline! It's people like you that make open source such a fantastic community to learn, inspire, and create.
+First off, thank you for considering contributing to the Autonomous job prep pipeline! It's people like you that make open source such a fantastic community to learn, inspire, and create.
 
 ## Code of Conduct
 
@@ -12,7 +12,7 @@ By participating in this project, you are expected to uphold our Code of Conduct
 1. Fork the repository on GitHub.
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/your-username/automated_job_pipeline.git
+   git clone https://github.com/your-username/MultiAI_Prep_Agents.git
    ```
 
 ### 2. Backend Setup
