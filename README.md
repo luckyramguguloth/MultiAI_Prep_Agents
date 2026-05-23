@@ -33,16 +33,49 @@ Our multi-agent orchestration architecture processes job leads seamlessly from d
 
 ```mermaid
 graph TD
-    UI[Next.js 3D WebGL UI] <-->|WebSockets| API[FastAPI Gateway]
-    API -->|WAF/Rate Limit| SEC[Security Layer AES-256]
-    SEC --> ORCH[Orchestrator Agent]
+    subgraph Client Layer (React 19 / R3F)
+        UI[Next.js WebGL Dashboard]
+        WS_CLIENT[WebSocket WSS Client]
+    end
+
+    subgraph Security Gateway Layer (WAF & Cryptography)
+        API[FastAPI Gateway Router]
+        LIMIT[SlowAPI DDoS Rate Limiter]
+        CORS[CORS Guard Gate]
+        SEC[AES-256 Cryptography Envelope]
+    end
+
+    subgraph AI Core Layer (CrewAI Orchestrator)
+        ORCH[Central Telemetry Switch]
+        A1[Step 1: The Scout]
+        A2[Step 2: The Tailor]
+        A3[Step 3: The Submitter]
+        A3_1[Step 3.1: Problem Solver]
+        A4[Step 4: Prep Coach]
+        A5[Step 5: Secure Archivist]
+        A6[Step 6: Efficiency Recycler]
+    end
+
+    subgraph External LLM Interface
+        LLM((OpenAI GPT-4o Engine))
+    end
+
+    subgraph Secure Ledger Output
+        FILE[(Secure Output PDF/JSON Ledger)]
+        CACHE[(Reusable Keyword Cache)]
+    end
+
+    UI <-->|WebSocket Stream| WS_CLIENT
+    WS_CLIENT <-->|Full Duplex WS| API
+    API --> LIMIT
+    LIMIT --> CORS
+    CORS --> SEC
+    SEC --> ORCH
     
-    ORCH --> A1[Scout Agent]
-    ORCH --> A2[Tailor Agent]
-    ORCH --> A3[Submitter Agent]
-    ORCH --> A4[Prep Coach Agent]
-    
-    A1 & A2 & A3 & A4 --> LLM((OpenAI GPT-4o / Local LLMs))
+    ORCH --> A1 & A2 & A3 & A3_1 & A4 & A5 & A6
+    A1 & A2 & A3 & A3_1 & A4 -->|Real-time Prompting| LLM
+    A5 --> FILE
+    A6 --> CACHE
 ```
 
 ---
@@ -83,6 +116,26 @@ The application features enterprise security controls designed to safeguard high
 *   **WAF Throttle (SlowAPI):** Rate limits requests securely (100 per minute) to prevent botnets or brute-force API key depletion.
 *   **Strict CORS Policy:** The FastAPI gateway strictly rejects any request not originating from port `3000`.
 </details>
+
+## 🔑 API Key Configuration Guide
+
+To enable actual real-time GPT-4o analysis and custom document tailors, you need to configure the core environment secrets. 
+
+### 1. Retrieve Your API Keys
+*   **OpenAI API Key (`OPENAI_API_KEY`):** Sign in to your [OpenAI Developer Platform](https://platform.openai.com/), navigate to the API Keys section, and generate a new secret token (starting with `sk-`).
+*   **Serper API Key (`SERPER_API_KEY` - Optional):** If you wish to enable the Scout agent to query live search results directly from Google search engines, create a free account on [Serper.dev](https://serper.dev/) and copy your API token.
+
+### 2. Configure Your `.env` File
+Create a new file named `.env` inside your **`backend/`** directory (or edit the placeholder file if already present) and populate it with your keys:
+
+```env
+# backend/.env
+OPENAI_API_KEY="sk-your-real-openai-api-key-here"
+SERPER_API_KEY="your-real-serper-api-key-here"
+```
+
+> [!IMPORTANT]
+> **Mock Fail-safe Active:** If the API keys are not configured or are left as default placeholders, the backend automatically switches to its internal semantic keyword-extraction engine to compile customized cover letters and assessments in real time, preventing service disruptions.
 
 ---
 
@@ -170,6 +223,9 @@ Docker will:
 1. Compile the FastAPI backend image and bind it to `http://localhost:8000`.
 2. Compile the Next.js 16 (React 19) node image and bind it to `http://localhost:3000`.
 3. Establish live communication channels between containers while maintaining isolated volumes for dependencies.
+
+---
+
 
 ## 📊 Agent Operations Matrix
 
@@ -286,3 +342,39 @@ If you encounter pipeline bottlenecks or environment issues during execution, ex
 *   **Cause:** The FastAPI gateway server is stopped, or the browser is blocking network loops.
 *   **Resolution:** Verify that `uvicorn` is actively running on `http://localhost:8000` and check CORS configuration properties in `backend/app/main.py` lines 20-30 to ensure origin matches the frontend host port.
 </details>
+
+---
+
+## 🤝 Support, Issues & Feedback
+
+If you encounter any bugs, library bottlenecks, or have feature suggestions regarding the AI agent framework, WebGL visual layouts, or process orchestration:
+*   **Open an Issue:** Please navigate to the **Issues** tab in the GitHub repository and click **New Issue**.
+*   **Guidelines:** Provide a clear description of the behavior, your active environment versions, and copy-pasteable traceback logs if applicable.
+*   **Feedback:** Contributions, pull requests, and creative ideas for adding new 3D props or custom agents are highly welcome!
+
+---
+
+## 🙋 Feel Free to Raise Issues!
+
+Do you have questions about the agent orchestration process, encountered a pipeline roadblock, or want to suggest improvements to the framework? 
+
+Please feel free to open a ticket in the **Issues** tab of this GitHub repository! Whether it is about:
+*   **The AI Multi-Agent Orchestration:** Agent logic, prompt design, telemetry feeds, or CrewAI/LangChain integration.
+*   **The WebGL 3D Dashboard:** WebGL shadow configurations, responsive CSS glassmorphic modules, canvas overlays, or 3D animations.
+*   **System Deployment & Scripts:** Local environment configurations, virtual environments, Docker images, or CLI execution queries.
+
+We actively monitor the issue tracking board and will do our best to guide you through solving any deployment bottlenecks. Let's make this framework more robust together! 🚀
+
+---
+
+## 🛡️ Security Disclaimer
+
+This application processes highly sensitive personal data (resumes, PII, API Keys). **DO NOT** disable the `security.py` AES-256 encryptions or the `slowapi` rate limiters when deploying to the cloud. Always use HTTPS in production.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check the `CONTRIBUTING.md` file for guidelines on how to add new 3D models or AI agents.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
