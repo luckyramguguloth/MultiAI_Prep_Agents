@@ -33,16 +33,61 @@
 
 ```mermaid
 graph TD
-    UI[Next.js 3D WebGL UI] <-->|WebSockets| API[FastAPI Gateway]
-    API -->|WAF/Rate Limit| SEC[Security Layer AES-256]
-    SEC --> ORCH[Orchestrator Agent]
+    subgraph client_layer ["Client Layer (React 19 / R3F)"]
+        UI["Next.js WebGL Dashboard"]
+        WS_CLIENT["WebSocket WSS Client"]
+    end
+
+    subgraph security_layer ["Security Gateway Layer (WAF & Cryptography)"]
+        API["FastAPI Gateway Router"]
+        LIMIT["SlowAPI DDoS Rate Limiter"]
+        CORS["CORS Guard Gate"]
+        SEC["AES-256 Cryptography Envelope"]
+    end
+
+    subgraph ai_core ["AI Core Layer (CrewAI Orchestrator)"]
+        ORCH["Central Telemetry Switch"]
+        A1["Step 1: The Scout"]
+        A2["Step 2: The Tailor"]
+        A3["Step 3: The Submitter"]
+        A3_1["Step 3.1: Problem Solver"]
+        A4["Step 4: Prep Coach"]
+        A5["Step 5: Secure Archivist"]
+        A6["Step 6: Efficiency Recycler"]
+    end
+
+    subgraph ext_llm ["External LLM Interface"]
+        LLM(("OpenAI GPT-4o Engine"))
+    end
+
+    subgraph secure_ledger ["Secure Ledger Output"]
+        FILE[("Secure Output PDF/JSON Ledger")]
+        CACHE[("Reusable Keyword Cache")]
+    end
+
+    UI <-->|WebSocket Stream| WS_CLIENT
+    WS_CLIENT <-->|Full Duplex WS| API
+    API --> LIMIT
+    LIMIT --> CORS
+    CORS --> SEC
+    SEC --> ORCH
     
-    ORCH --> A1[Scout Agent]
-    ORCH --> A2[Tailor Agent]
-    ORCH --> A3[Submitter Agent]
-    ORCH --> A4[Prep Coach Agent]
-    
-    A1 & A2 & A3 & A4 --> LLM((OpenAI GPT-4o / Local LLMs))
+    ORCH --> A1
+    ORCH --> A2
+    ORCH --> A3
+    ORCH --> A3_1
+    ORCH --> A4
+    ORCH --> A5
+    ORCH --> A6
+
+    A1 -->|Real-time Prompting| LLM
+    A2 -->|Real-time Prompting| LLM
+    A3 -->|Real-time Prompting| LLM
+    A3_1 -->|Real-time Prompting| LLM
+    A4 -->|Real-time Prompting| LLM
+
+    A5 --> FILE
+    A6 --> CACHE
 ```
 
 ---
@@ -83,6 +128,26 @@ graph TD
 *   **WAF 流量限制 (SlowAPI):** 接口默认限制单 IP 每分钟 100 次请求，有效预防 DDoS 攻击和恶意刷取 API 额度。
 *   **严格 CORS 域限制:** 后端 FastAPI 严格拒绝任何非本地前端端口 `3000` 之外的请求。
 </details>
+
+## 🔑 API 密钥配置指南
+
+要启用真实的实时 GPT-4o 数据分析与定制文档优化功能，您需要配置核心环境凭证密钥。
+
+### 1. 获取您的 API 密钥
+*   **OpenAI API 密钥 (`OPENAI_API_KEY`):** 登录您的 [OpenAI 开发者平台](https://platform.openai.com/)，导航至 API Keys 页面，并生成一个新的密钥（以 `sk-` 开头）。
+*   **Serper API 密钥 (`SERPER_API_KEY` - 选填):** 如果您希望启用侦察员（Scout）智能体直接通过 Google 搜索引擎查询实时最新的求职信息，请在 [Serper.dev](https://serper.dev/) 创建免费账户并复制您的 API 令牌。
+
+### 2. 配置您的 `.env` 配置文件
+在项目中的 **`backend/`** 目录内创建一个新文件并命名为 `.env`（如果已经存在，则编辑该文件），然后填入您的密钥：
+
+```env
+# backend/.env
+OPENAI_API_KEY="sk-您的真实OpenAI密钥"
+SERPER_API_KEY="您的真实Serper密钥"
+```
+
+> [!IMPORTANT]
+> **本地语义兜底引擎激活:** 如果未配置 API 密钥或保留为默认占位符，后端将自动切换至其内置的语义提取引擎，在本地对岗位要求进行解析，实时合成定制的求职信和技术问答，防止服务中断。
 
 ---
 
@@ -161,6 +226,17 @@ npm run dev
 docker-compose up --build
 ```
 容器构建完毕后，会自动在 `http://localhost:8000` 映射后端、`http://localhost:3000` 映射前端，并打通容器内部的 WebSocket 通讯渠道。
+
+---
+
+## 📂 前端静态资源目录架构 (`frontend/public/`)
+
+Next.js 前端应用将其所有静态图像和模型资源存放在 **`frontend/public/`** 目录下。理解这套结构对于保证流畅的 3D 渲染速度至关重要：
+
+### 为什么资源存放在 `public/` 中？
+*   **静态 URL 路由服务:** Next.js 将 `public/` 下的文件直接静态映射在根路径上（例如，`frontend/public/3d_visualizer.svg` 在浏览器端可以直接通过 `http://localhost:3000/3d_visualizer.svg` 访问）。
+*   **零打包编译开销:** 将复杂的矢量 SVG 资源、图标、大图（如系统 logo 和求职空间 3D 等距可视化图 `3d_visualizer.svg`）存放在 `public/` 中，可阻止 Next.js 编译器对它们进行动态分析和代码打包。这为浏览器渲染 Three.js 等距办公室提供了完整的 GPU 资源，从而保证 flat 60 FPS 渲染流畅度。
+*   **隔离与一键引用:** 将 `3d_visualizer.svg` 同时存储在 Git 根目录以及前端的 `public/` 下，能在满足 Markdown 文档使用相对链接引用的同时，让 Next.js 生产环境一键静态 serve 访问。
 
 ---
 
@@ -279,3 +355,39 @@ docker-compose up --build
 *   **发生原因:** FastAPI 后端服务挂起，或是 CORS 允许策略未被浏览器正常解析。
 *   **解决方法:** 确认 `uvicorn` 在 `http://localhost:8000` 稳定运行，并检查 `backend/app/main.py` 中的 CORS 白名单策略。
 </details>
+
+---
+
+## 🤝 故障反馈、支持与建议
+
+如果您在运行智能体框架、WebGL 3D 画布渲染或自动化应用提交流水线时遇到任何 bug、性能瓶颈或功能改进建议：
+*   **提交 Issue 故障单:** 请导航至 GitHub 仓库的 **Issues** 选项卡，点击 **New Issue**。
+*   **编写说明:** 请详细描述异常现象、您本地运行的依赖包版本，并附带控制台的报错日志（Traceback）。
+*   **社区参与:** 我们非常欢迎各种形式的贡献（Pull Request），包括补充新的 3D 办公室装饰模型或引入全新的协同 AI 智能体！
+
+---
+
+## 🙋 欢迎在 GitHub 提交 Issue 反馈！
+
+如果您对智能体协同流程有任何疑问、在运行流水线时遇到阻碍，或者希望对框架提出改进建议：
+
+请随时在本 GitHub 仓库的 **Issues** 选项卡中提交反馈！无论是关于：
+*   **AI 多智能体协同 (AI Orchestration):** 智能体运行逻辑、Prompt 提示词设计、状态实时广播或 CrewAI/LangChain 框架集成。
+*   **WebGL 3D 交互面板:** WebGL 阴影设置、响应式 CSS 磨砂玻璃效果、Canvas 交互覆盖层或 3D 动画渲染。
+*   **系统部署与脚本运行:** 本地开发环境配置、Python 虚拟环境激活、Docker 镜像构建或命令行（CLI）运行疑问。
+
+我们高度重视并会积极关注社区的反馈，尽最大可能协助您解决部署与运行过程中的各类技术瓶颈。让我们共同打造更强大的多智能体求职助手！ 🚀
+
+---
+
+## 🛡️ 安全合规免责声明
+
+本应用将处理求职者高度敏感的个人信息（如简历、PII 隐私、API 密钥）。**请勿**在云端部署时禁用 `security.py` 的 AES-256 位加密策略或 `slowapi` 的频率限制规则。生产环境必须强制配置并使用 HTTPS 安全通信通道。
+
+## 🤝 参与贡献
+
+欢迎大家参与贡献！请检查 `CONTRIBUTING.md` 文件以获取有关如何添加新 3D 模型或 AI 智能体的详细开发导引。
+
+## 📄 开源许可证
+
+本项目基于 MIT 许可证开源 - 详情请参阅 [LICENSE](LICENSE) 证书。

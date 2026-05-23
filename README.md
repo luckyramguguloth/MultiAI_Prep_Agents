@@ -33,36 +33,36 @@ Our multi-agent orchestration architecture processes job leads seamlessly from d
 
 ```mermaid
 graph TD
-    subgraph Client Layer (React 19 / R3F)
-        UI[Next.js WebGL Dashboard]
-        WS_CLIENT[WebSocket WSS Client]
+    subgraph client_layer ["Client Layer (React 19 / R3F)"]
+        UI["Next.js WebGL Dashboard"]
+        WS_CLIENT["WebSocket WSS Client"]
     end
 
-    subgraph Security Gateway Layer (WAF & Cryptography)
-        API[FastAPI Gateway Router]
-        LIMIT[SlowAPI DDoS Rate Limiter]
-        CORS[CORS Guard Gate]
-        SEC[AES-256 Cryptography Envelope]
+    subgraph security_layer ["Security Gateway Layer (WAF & Cryptography)"]
+        API["FastAPI Gateway Router"]
+        LIMIT["SlowAPI DDoS Rate Limiter"]
+        CORS["CORS Guard Gate"]
+        SEC["AES-256 Cryptography Envelope"]
     end
 
-    subgraph AI Core Layer (CrewAI Orchestrator)
-        ORCH[Central Telemetry Switch]
-        A1[Step 1: The Scout]
-        A2[Step 2: The Tailor]
-        A3[Step 3: The Submitter]
-        A3_1[Step 3.1: Problem Solver]
-        A4[Step 4: Prep Coach]
-        A5[Step 5: Secure Archivist]
-        A6[Step 6: Efficiency Recycler]
+    subgraph ai_core ["AI Core Layer (CrewAI Orchestrator)"]
+        ORCH["Central Telemetry Switch"]
+        A1["Step 1: The Scout"]
+        A2["Step 2: The Tailor"]
+        A3["Step 3: The Submitter"]
+        A3_1["Step 3.1: Problem Solver"]
+        A4["Step 4: Prep Coach"]
+        A5["Step 5: Secure Archivist"]
+        A6["Step 6: Efficiency Recycler"]
     end
 
-    subgraph External LLM Interface
-        LLM((OpenAI GPT-4o Engine))
+    subgraph ext_llm ["External LLM Interface"]
+        LLM(("OpenAI GPT-4o Engine"))
     end
 
-    subgraph Secure Ledger Output
-        FILE[(Secure Output PDF/JSON Ledger)]
-        CACHE[(Reusable Keyword Cache)]
+    subgraph secure_ledger ["Secure Ledger Output"]
+        FILE[("Secure Output PDF/JSON Ledger")]
+        CACHE[("Reusable Keyword Cache")]
     end
 
     UI <-->|WebSocket Stream| WS_CLIENT
@@ -72,8 +72,20 @@ graph TD
     CORS --> SEC
     SEC --> ORCH
     
-    ORCH --> A1 & A2 & A3 & A3_1 & A4 & A5 & A6
-    A1 & A2 & A3 & A3_1 & A4 -->|Real-time Prompting| LLM
+    ORCH --> A1
+    ORCH --> A2
+    ORCH --> A3
+    ORCH --> A3_1
+    ORCH --> A4
+    ORCH --> A5
+    ORCH --> A6
+
+    A1 -->|Real-time Prompting| LLM
+    A2 -->|Real-time Prompting| LLM
+    A3 -->|Real-time Prompting| LLM
+    A3_1 -->|Real-time Prompting| LLM
+    A4 -->|Real-time Prompting| LLM
+
     A5 --> FILE
     A6 --> CACHE
 ```

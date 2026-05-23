@@ -33,16 +33,61 @@ Nuestra arquitectura de orquestación multiagente procesa las ofertas de empleo 
 
 ```mermaid
 graph TD
-    UI[Next.js 3D WebGL UI] <-->|WebSockets| API[FastAPI Gateway]
-    API -->|WAF/Rate Limit| SEC[Security Layer AES-256]
-    SEC --> ORCH[Orchestrator Agent]
+    subgraph client_layer ["Client Layer (React 19 / R3F)"]
+        UI["Next.js WebGL Dashboard"]
+        WS_CLIENT["WebSocket WSS Client"]
+    end
+
+    subgraph security_layer ["Security Gateway Layer (WAF & Cryptography)"]
+        API["FastAPI Gateway Router"]
+        LIMIT["SlowAPI DDoS Rate Limiter"]
+        CORS["CORS Guard Gate"]
+        SEC["AES-256 Cryptography Envelope"]
+    end
+
+    subgraph ai_core ["AI Core Layer (CrewAI Orchestrator)"]
+        ORCH["Central Telemetry Switch"]
+        A1["Step 1: The Scout"]
+        A2["Step 2: The Tailor"]
+        A3["Step 3: The Submitter"]
+        A3_1["Step 3.1: Problem Solver"]
+        A4["Step 4: Prep Coach"]
+        A5["Step 5: Secure Archivist"]
+        A6["Step 6: Efficiency Recycler"]
+    end
+
+    subgraph ext_llm ["External LLM Interface"]
+        LLM(("OpenAI GPT-4o Engine"))
+    end
+
+    subgraph secure_ledger ["Secure Ledger Output"]
+        FILE[("Secure Output PDF/JSON Ledger")]
+        CACHE[("Reusable Keyword Cache")]
+    end
+
+    UI <-->|WebSocket Stream| WS_CLIENT
+    WS_CLIENT <-->|Full Duplex WS| API
+    API --> LIMIT
+    LIMIT --> CORS
+    CORS --> SEC
+    SEC --> ORCH
     
-    ORCH --> A1[Scout Agent]
-    ORCH --> A2[Tailor Agent]
-    ORCH --> A3[Submitter Agent]
-    ORCH --> A4[Prep Coach Agent]
-    
-    A1 & A2 & A3 & A4 --> LLM((OpenAI GPT-4o / Local LLMs))
+    ORCH --> A1
+    ORCH --> A2
+    ORCH --> A3
+    ORCH --> A3_1
+    ORCH --> A4
+    ORCH --> A5
+    ORCH --> A6
+
+    A1 -->|Real-time Prompting| LLM
+    A2 -->|Real-time Prompting| LLM
+    A3 -->|Real-time Prompting| LLM
+    A3_1 -->|Real-time Prompting| LLM
+    A4 -->|Real-time Prompting| LLM
+
+    A5 --> FILE
+    A6 --> CACHE
 ```
 
 ---
@@ -83,6 +128,26 @@ El sistema implementa estrictos controles de seguridad para proteger los datos p
 *   **Cortafuegos (WAF) Throttling:** La API implementa SlowAPI para limitar peticiones (100 por minuto) y prevenir ataques de denegación de servicio (DDoS).
 *   **Política Estricta de CORS:** El gateway FastAPI rechaza cualquier origen que no sea el puerto frontend `3000`.
 </details>
+
+## 🔑 Guía de Configuración de Claves de API
+
+Para habilitar análisis reales con GPT-4o y adaptaciones de documentos personalizadas, debe configurar las credenciales clave del entorno:
+
+### 1. Obtenga sus Claves de API
+*   **Clave de API de OpenAI (`OPENAI_API_KEY`):** Regístrese en su [Plataforma de Desarrolladores de OpenAI](https://platform.openai.com/), navegue a la sección de API Keys y genere un nuevo token secreto (comenzando con `sk-`).
+*   **Clave de API de Serper (`SERPER_API_KEY` - Opcional):** Si desea habilitar al agente Scout para realizar búsquedas activas en tiempo real directamente a través del buscador de Google, cree una cuenta gratuita en [Serper.dev](https://serper.dev/) y copie su token de API.
+
+### 2. Configure su archivo `.env`
+Cree un archivo llamado `.env` dentro de la carpeta **`backend/`** (o edite el archivo marcador si ya existe) y asigne sus claves de API:
+
+```env
+# backend/.env
+OPENAI_API_KEY="sk-tu-clave-real-aqui"
+SERPER_API_KEY="tu-clave-serper-real-aqui"
+```
+
+> [!IMPORTANT]
+> **Modo Fallback Activo:** Si los tokens no están configurados o se dejan como marcadores de posición predeterminados, el backend activará automáticamente su motor de extracción semántica interna para reescribir cartas y solucionar evaluaciones en tiempo real sin interrumpir el funcionamiento del sistema dashboard.
 
 ---
 
@@ -161,6 +226,17 @@ Para ejecutar toda la pila (tanto frontend como backend) de forma unificada en c
 docker-compose up --build
 ```
 Docker compilará automáticamente las imágenes de backend (`http://localhost:8000`) y frontend (`http://localhost:3000`) estableciendo la comunicación por WebSockets en red interna.
+
+---
+
+## 📂 Arquitectura de Activos Estáticos del Frontend (`frontend/public/`)
+
+El frontend de Next.js aloja sus activos gráficos estáticos bajo la carpeta **`frontend/public/`**. Comprender esta estructura es crucial para mantener la velocidad de renderizado en 3D:
+
+### ¿Por qué se guardan los archivos en `public/`?
+*   **Enrutamiento Estático Directo:** Next.js expone el contenido de `public/` en la ruta raíz del host (por ejemplo, `frontend/public/3d_visualizer.svg` está disponible directamente en `http://localhost:3000/3d_visualizer.svg`).
+*   **Cero Overhead de Compilación:** Mantener archivos vectoriales complejos o imágenes pesadas (como logos del sistema, fondos e imágenes isométricas) en la carpeta `public/` evita que los compiladores como Webpack o Turbopack los analicen dinámicamente, reservando todos los recursos de GPU para las animaciones y sombreados en el lienzo de Three.js.
+*   **Aislamiento y Sincronía:** Guardar `3d_visualizer.svg` tanto en la raíz de Git como en la carpeta `public/` del frontend permite que las vistas previas de Markdown carguen el enlace relativo del repositorio mientras el navegador del cliente lo descarga directamente del servidor local.
 
 ---
 
@@ -279,3 +355,39 @@ Si experimentas problemas durante la ejecución, despliega las secciones para ve
 *   **Causa:** El servidor de FastAPI no se está ejecutando o los puertos de CORS están bloqueados.
 *   **Solución:** Comprueba que `uvicorn` se está ejecutando en `http://localhost:8000` y revisa las políticas de CORS en `backend/app/main.py`.
 </details>
+
+---
+
+## 🤝 Soporte, Problemas y Comentarios
+
+Si experimenta algún error, cuello de botella en las librerías o tiene sugerencias sobre la estructura de agentes de IA, los lienzos WebGL 3D o el pipeline general:
+*   **Abra un Issue:** Por favor navegue a la pestaña de **Issues** en el repositorio de GitHub y haga clic en **New Issue**.
+*   **Pautas:** Proporcione una descripción detallada de la anomalía, las versiones de su entorno de desarrollo local y capturas de los logs del sistema si es aplicable.
+*   **Feedback:** ¡Las contribuciones y Pull Requests para enriquecer los modelos 3D o añadir nuevos agentes de IA son altamente bienvenidas!
+
+---
+
+## 🙋 ¡No dudes en abrir un Issue!
+
+¿Tienes preguntas sobre el proceso de orquestación de agentes, encontraste un obstáculo en el pipeline o quieres sugerir mejoras para el framework?
+
+¡No dudes en abrir un ticket en la pestaña **Issues** de este repositorio de GitHub! Ya sea sobre:
+*   **La Orquestación Multiagente de IA:** Lógica de agentes, diseño de prompts, transmisiones de telemetría o integración con CrewAI/LangChain.
+*   **El Dashboard WebGL 3D:** Configuraciones de sombras WebGL, módulos glasomórficos CSS responsivos, superposiciones de lienzo o animaciones 3D.
+*   **Despliegue del Sistema y Scripts:** Configuraciones de entornos locales, entornos virtuales, imágenes Docker o consultas sobre la ejecución en CLI.
+
+Monitoreamos activamente el tablero de seguimiento de problemas y haremos todo lo posible para guiarte a resolver cualquier obstáculo de despliegue. ¡Hagamos que este framework sea más robusto juntos! 🚀
+
+---
+
+## 🛡️ Descargo de Responsabilidad de Seguridad
+
+Esta aplicación procesa datos personales altamente sensibles (currículums, información de identificación personal, claves de API). **NO** deshabilite los cifrados AES-256 de `security.py` ni los rate limiters de `slowapi` al desplegar en la nube. Use siempre HTTPS en producción.
+
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Revise el archivo `CONTRIBUTING.md` para ver las pautas sobre cómo añadir nuevos modelos 3D o agentes de IA.
+
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT; consulte el archivo [LICENSE](LICENSE) para obtener más detalles.
