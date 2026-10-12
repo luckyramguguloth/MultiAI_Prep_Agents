@@ -1,4 +1,4 @@
-<svg viewBox="0 0 800 450" width="100%" style="background:#050505; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 850 480" width="100%" style="background:#050505; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5);" xmlns="http://www.w3.org/2000/svg">
   <style>
     @keyframes bounce {
       0%, 100% { transform: translateY(0px) scaleY(1); }
@@ -25,8 +25,10 @@
     .orchestrator { animation: breathe 4s ease-in-out infinite; }
     .glow-effect { animation: pulse-glow 2.5s ease-in-out infinite; }
     .connector { stroke: #10b981; stroke-dasharray: 6 6; stroke-width: 1.5px; animation: connection-pulse 1.5s linear infinite; }
-    .label { font-family: 'Courier New', monospace; font-size: 11px; fill: #ffffff; text-anchor: middle; font-weight: bold; }
+    .label { font-family: 'Courier New', monospace; font-size: 10px; fill: #ffffff; text-anchor: middle; font-weight: bold; }
+    .step-badge { font-family: 'Courier New', monospace; font-size: 9px; fill: #10b981; text-anchor: middle; font-weight: bold; }
     .hud-text { font-family: 'Courier New', monospace; font-size: 12px; fill: #10b981; }
+    .process-line { stroke: #1e293b; stroke-width: 1.5px; stroke-dasharray: 4 4; }
   </style>
 
   <defs>
@@ -42,55 +44,76 @@
   </defs>
 
   <!-- Ground Plane (Isometric Grid) -->
-  <polygon points="400,50 750,225 400,400 50,225" class="isometric-floor" />
-  <line x1="225" y1="137" x2="575" y2="312" stroke="#1e293b" stroke-width="0.5" />
-  <line x1="575" y1="137" x2="225" y2="312" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2 2" />
+  <polygon points="425,50 800,237 425,425 50,237" class="isometric-floor" />
+  <line x1="225" y1="137" x2="625" y2="337" stroke="#1e293b" stroke-width="0.5" />
+  <line x1="625" y1="137" x2="225" y2="337" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2 2" />
 
-  <!-- Data Flow Network Connections -->
-  <path d="M 150,175 L 300,125" class="connector" />
-  <path d="M 300,125 L 450,175" class="connector" />
-  <path d="M 400,280 L 450,175" class="connector" stroke="#3b82f6" />
-  <path d="M 400,280 L 300,325" class="connector" />
+  <!-- Data Flow Network Connections & Execution Vectors -->
+  <path d="M 150,175 L 300,135" class="connector" />
+  <path d="M 300,135 L 450,185" class="connector" />
+  <path d="M 450,185 L 600,135" class="connector" />
+  <path d="M 425,290 L 450,185" class="connector" stroke="#3b82f6" />
+  <path d="M 425,290 L 300,335" class="connector" />
 
-  <!-- 3D Node: The Scout (Active / Working) -->
-  <g class="agent-node scout" transform="translate(150, 175)">
+  <!-- STEP 1: The Scout (Active Bouncing) -->
+  <g class="agent-node scout" transform="translate(150, 185)">
     <polygon points="0,-25 22,-36 0,-47 -22,-36" fill="#34d399" class="glow-effect" />
     <polygon points="-22,-36 0,-25 0,0 -22,-11" fill="#059669" />
     <polygon points="0,-25 22,-36 22,-11 0,0" fill="#047857" />
-    <text x="0" y="25" class="label">THE SCOUT (WORKING)</text>
+    <text x="0" y="-55" class="step-badge">STEP 01</text>
+    <text x="0" y="25" class="label">THE SCOUT</text>
+    <text x="0" y="38" class="label" style="fill:#94a3b8; font-size:8px;">[ACTIVE SEARCH]</text>
   </g>
 
-  <!-- 3D Node: The Tailor (Idle Breathing) -->
-  <g class="agent-node tailor" transform="translate(300, 125)">
+  <!-- STEP 2: The Tailor (Idle Breathing) -->
+  <g class="agent-node tailor" transform="translate(300, 135)">
     <polygon points="0,-25 22,-36 0,-47 -22,-36" fill="#60a5fa" />
     <polygon points="-22,-36 0,-25 0,0 -22,-11" fill="#2563eb" />
     <polygon points="0,-25 22,-36 22,-11 0,0" fill="#1d4ed8" />
+    <text x="0" y="-55" class="step-badge" style="fill:#60a5fa;">STEP 02</text>
     <text x="0" y="25" class="label">THE TAILOR</text>
+    <text x="0" y="38" class="label" style="fill:#94a3b8; font-size:8px;">[ATS OPTIMIZER]</text>
   </g>
 
-  <!-- 3D Node: The Submitter (Waiting) -->
-  <g class="agent-node submitter" transform="translate(450, 175)">
+  <!-- STEP 3: The Submitter (Waiting) -->
+  <g class="agent-node submitter" transform="translate(450, 185)">
     <polygon points="0,-25 22,-36 0,-47 -22,-36" fill="#60a5fa" />
     <polygon points="-22,-36 0,-25 0,0 -22,-11" fill="#2563eb" />
     <polygon points="0,-25 22,-36 22,-11 0,0" fill="#1d4ed8" />
+    <text x="0" y="-55" class="step-badge" style="fill:#60a5fa;">STEP 03</text>
     <text x="0" y="25" class="label">THE SUBMITTER</text>
+    <text x="0" y="38" class="label" style="fill:#94a3b8; font-size:8px;">[PAYLOAD BUNDLER]</text>
   </g>
 
-  <!-- 3D Node: Central Orchestrator -->
-  <g class="agent-node orchestrator" transform="translate(400, 280)">
+  <!-- STEP 3.1: Problem Solver -->
+  <g class="agent-node solver" transform="translate(600, 135)">
+    <polygon points="0,-25 22,-36 0,-47 -22,-36" fill="#60a5fa" />
+    <polygon points="-22,-36 0,-25 0,0 -22,-11" fill="#2563eb" />
+    <polygon points="0,-25 22,-36 22,-11 0,0" fill="#1d4ed8" />
+    <text x="0" y="-55" class="step-badge" style="fill:#60a5fa;">STEP 3.1</text>
+    <text x="0" y="25" class="label">PROBLEM SOLVER</text>
+    <text x="0" y="38" class="label" style="fill:#94a3b8; font-size:8px;">[ASSESSMENT SOLVER]</text>
+  </g>
+
+  <!-- STEP 7: Central Orchestrator Hub -->
+  <g class="agent-node orchestrator" transform="translate(425, 290)">
     <polygon points="0,-35 30,-50 0,-65 -30,-50" fill="#10b981" class="glow-effect" />
     <polygon points="-30,-50 0,-35 0,5 -30,-10" fill="#059669" />
     <polygon points="0,-35 30,-50 30,-10 0,5" fill="#047857" />
-    <text x="0" y="30" class="label" style="fill:#10b981;">ORCHESTRATOR</text>
+    <text x="0" y="-75" class="step-badge" style="fill:#10b981; font-size:11px;">ORCHESTRATOR</text>
+    <text x="0" y="25" class="label" style="fill:#10b981;">THE HUB</text>
+    <text x="0" y="38" class="label" style="fill:#34d399; font-size:8px;">[TELEMETRY SWITCH]</text>
   </g>
 
-  <!-- Master Console Console Overlay (Bottom Left) -->
-  <rect x="20" y="360" width="320" height="70" fill="rgba(0,0,0,0.85)" rx="10" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1.5" />
-  <text x="35" y="380" class="hud-text" style="font-weight:bold;">[SYS_STATUS]: ACTIVE</text>
-  <text x="35" y="400" class="hud-text" style="fill:#94a3b8;">&gt; WebSocket WSS: CONNECTED</text>
-  <text x="35" y="420" class="hud-text" style="fill:#34d399;">&gt; Scout found 3 matched vacancies...</text>
+  <!-- Live Telemetry Monitor (Bottom Left Overlay) -->
+  <rect x="20" y="370" width="340" height="90" fill="rgba(0,0,0,0.85)" rx="10" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1.5" />
+  <text x="35" y="395" class="hud-text" style="font-weight:bold;">[PIPELINE STATUS]: ACTIVE</text>
+  <text x="35" y="415" class="hud-text" style="fill:#94a3b8;">&gt; Telemetry Stream: CONNECTED</text>
+  <text x="35" y="435" class="hud-text" style="fill:#34d399;">&gt; Step 01: Scout parsed Job specifications...</text>
 
-  <!-- HUD Stats (Top Right) -->
-  <text x="780" y="30" class="hud-text" style="text-anchor:end; font-weight:bold;">SECURE PIPELINE V2.0</text>
-  <text x="780" y="50" class="hud-text" style="text-anchor:end; fill:#ef4444;">AES-256 ENCRYPTED</text>
+  <!-- Dossier output visual index (Bottom Right Overlay) -->
+  <rect x="520" y="370" width="300" height="90" fill="rgba(0,0,0,0.85)" rx="10" stroke="rgba(59, 130, 246, 0.4)" stroke-width="1.5" />
+  <text x="535" y="395" class="hud-text" style="fill:#3b82f6; font-weight:bold;">[PREP DOSSIER BUNDLE]</text>
+  <text x="535" y="415" class="hud-text" style="fill:#94a3b8; font-size:10px;">&gt; [ATS Optimized Resume]: 97% MATCH</text>
+  <text x="535" y="435" class="hud-text" style="fill:#94a3b8; font-size:10px;">&gt; [LeetCode &amp; Systems Guides]: BUNDLED</text>
 </svg>
