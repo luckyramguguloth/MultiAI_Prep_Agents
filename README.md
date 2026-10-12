@@ -129,35 +129,104 @@ The application features enterprise security controls designed to safeguard high
 *   **Strict CORS Policy:** The FastAPI gateway strictly rejects any request not originating from port `3000`.
 </details>
 
-## 🔑 API Key Configuration Guide
+## 🚀 Quickstart & Execution Workflow
 
-To enable actual real-time GPT-4o analysis and custom document tailors, you need to configure the core environment secrets. 
+### ⚡ 1-Click Master Launch (Windows)
 
-### 1. Retrieve Your API Keys
-*   **OpenAI API Key (`OPENAI_API_KEY`):** Sign in to your [OpenAI Developer Platform](https://platform.openai.com/), navigate to the API Keys section, and generate a new secret token (starting with `sk-`).
-*   **Serper API Key (`SERPER_API_KEY` - Optional):** If you wish to enable the Scout agent to query live search results directly from Google search engines, create a free account on [Serper.dev](https://serper.dev/) and copy your API token.
+The fastest and recommended way to start both the FastAPI backend and Next.js 3D frontend on Windows is with the automated root launchers. Simply double-click **`run.bat`** or execute it from PowerShell / Command Prompt:
 
-### 2. Configure Your `.env` File
-Create a new file named `.env` inside your **`backend/`** directory (or edit the placeholder file if already present) and populate it with your keys:
-
-```env
-# backend/.env
-OPENAI_API_KEY="sk-your-real-openai-api-key-here"
-SERPER_API_KEY="your-real-serper-api-key-here"
+```cmd
+run.bat
 ```
 
-> [!IMPORTANT]
-> **Mock Fail-safe Active:** If the API keys are not configured or are left as default placeholders, the backend automatically switches to its internal semantic keyword-extraction engine to compile customized cover letters and assessments in real time, preventing service disruptions.
+> [!TIP]
+> **`start_project.bat`** is also provided in the repository root as a convenient 1-click alias forwarding to `run.bat`.
+
+#### What the Master Launcher Handles Automatically:
+1. **Prerequisite Verification:**
+   - **Python 3.10+:** Detects an existing virtual environment (`backend\venv\Scripts\python.exe`), system `python`, or Windows Python launcher (`py`).
+   - **Node.js 18+ & npm:** Confirms `node` and `npm` are installed and available on `PATH`.
+2. **Automated Configuration Provisioning:**
+   - Checks if `backend\.env` exists. If not, it automatically initializes it by copying `backend\.env.example`.
+3. **Dependency Self-Healing:**
+   - Checks if `frontend\node_modules` exists; if missing, it runs `npm install` automatically before starting the UI.
+4. **Port Conflict Pre-check:**
+   - Scans ports `8000` (FastAPI) and `3000` (Next.js) and alerts if prior server instances are already running.
+5. **Dedicated Service Terminal Windows:**
+   - **FastAPI Backend (Port 8000):** Spawns a labeled command window running Uvicorn (`http://localhost:8000`), with interactive OpenAPI documentation at `http://localhost:8000/docs`.
+   - **Next.js 3D Frontend (Port 3000):** Spawns a dedicated command window running `npm run dev` on `http://localhost:3000`.
+6. **Automatic Browser Launch:**
+   - Pauses briefly (4 seconds) for the services to bind, then automatically opens `http://localhost:3000` in your default web browser.
 
 ---
 
-## 💻 Operating System & Platform Setup Guides
+### 🧩 Modular Component Launchers (Standalone Execution)
 
-Select your preferred platform below to view detailed installation and deployment instructions:
+If you are developing or testing an individual tier independently, standalone modular launchers are also available:
 
-### 1. Windows Systems (PowerShell & Command Prompt)
+| Launcher Script | Target Component | Default URL | Description |
+| :--- | :--- | :--- | :--- |
+| **`start_backend.bat`** | FastAPI Backend | [`http://localhost:8000`](http://localhost:8000) | Detects `backend\venv` / Python, launches Uvicorn with hot reload (`--reload`), exposes Swagger docs at [`/docs`](http://localhost:8000/docs). |
+| **`start_frontend.bat`** | Next.js 16 3D UI | [`http://localhost:3000`](http://localhost:3000) | Validates npm, automatically runs `npm install` if `node_modules` is missing, and starts the development server. |
 
-To launch the virtual environment and serve the project locally on Windows environments:
+---
+
+## 🔑 Environment & API Key Configuration
+
+The pipeline supports both **fully offline zero-cost execution** and **live OpenAI GPT-4o analysis**.
+
+### 1. Template vs. Active Configuration (`.env.example` vs `.env`)
+
+The repository includes a clean configuration template in `backend/.env.example`:
+
+```env
+# Configuration Environment Variables
+# If OPENAI_API_KEY is left empty, the built-in Semantic Extraction Fallback Engine is activated automatically.
+OPENAI_API_KEY=
+SERPER_API_KEY=
+GEMINI_API_KEY=
+```
+
+To configure your environment manually, copy `backend/.env.example` to `backend/.env`:
+
+```powershell
+# Windows (PowerShell / CMD)
+copy backend\.env.example backend\.env
+
+# macOS / Linux (Bash)
+cp backend/.env.example backend/.env
+```
+*(Note: `run.bat` automatically creates `backend\.env` from `.env.example` on first run if missing.)*
+
+### 2. Zero-Config Fallback vs. Live LLM Integration
+
+* **🛡️ Zero-Cost Semantic Extraction Fallback Engine (Default):**
+  If `OPENAI_API_KEY` is not provided, left blank, or set to a placeholder, the backend automatically activates its internal **Semantic Extraction Fallback Engine** (`backend/app/agents/crew.py`). It dynamically analyzes incoming job queries, extracts key domain skills and technologies (React, Python, TypeScript, Docker, AWS, etc.), and generates:
+  - Realistic ATS match scores (90%–99%).
+  - Tailored cover letters targeted to the specific job listing.
+  - Challenging technical interview Q&A pairs tailored to the tech stack.
+  - Curated preparation resource links (LeetCode, GitHub, MDN).
+  
+  > [!NOTE]
+  > **No external API keys, tokens, or subscriptions are required.** You can run and test the complete end-to-end pipeline with zero external service dependencies.
+
+* **🧠 Live OpenAI GPT-4o Engine (Optional):**
+  To enable dynamic LLM completions powered by OpenAI:
+  1. Retrieve your API key from the [OpenAI Platform](https://platform.openai.com/).
+  2. Set `OPENAI_API_KEY="sk-..."` in `backend/.env`.
+
+* **🌐 Serper Search Hook (`SERPER_API_KEY` - Optional):**
+  If you wish to enable the Scout agent to query live Google search vacancies, set your token from [Serper.dev](https://serper.dev/) in `backend/.env`.
+
+---
+
+## 💻 Manual Setup & Multi-Platform Deployment Guides
+
+If you prefer manual setup or are running on macOS/Linux environments, follow the step-by-step guides below:
+
+### 1. Windows Systems (Manual PowerShell & Command Prompt)
+
+To manually set up your virtual environment and launch services on Windows:
 
 ```powershell
 # Open terminal and navigate to backend directory
@@ -179,7 +248,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-*Frontend Console Setup:*
+*Frontend Console Setup (in a separate terminal):*
 ```cmd
 cd frontend
 npm install
